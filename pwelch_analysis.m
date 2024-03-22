@@ -1,0 +1,33 @@
+rng default
+% fs=0.2;
+%t=0:1/fs:5-2/fs;
+% 
+% [pxx,f] = pwelch(Z_all_ave,368377,184150,368377,fs);
+%  sd_all=std(Z_all);
+%  M_all=mean(Z_all);
+% errp=M_all+sd_all;
+% errm=M_all-sd_all;
+% figure('Name','Allperson power','NumberTitle','off');
+% %semilogy(f,pxx)
+% loglog(f,M_all,'-k');
+% hold on;
+% loglog(f,errp,'--b');
+% hold on;
+% loglog(f,errm,'--b');
+% grid on;
+% ylim([100 1000000]);
+% title('Allperson AllDay');
+% xlabel('Frequency(Hz)');
+% ylabel('Power');
+
+% 
+[pxx1,f] = pwelch(Z_maru,122792,49116,122792);
+% [pxx2,f] = pwelch(Z_hiki,122792,49116,122792,fs);
+% [pxx3,f] = pwelch(Z_yasu,122792,49116,122792,fs);
+% [pxx4,f] = pwelch(Z_kawa,122792,49116,122792,fs);
+% [pxx5,f] = pwelch(Z_shima,122792,49116,122792,fs);
+% [pxx6,f] = pwelch(Z_tuno,122792,49116,122792,fs);
+% [pxx7,f] = pwelch(Z_huka,122792,49116,122792,fs);
+% [pxx8,f] = pwelch(Z_huzi,122792,49116,122792,fs);
+% [pxx9,f] = pwelch(Z_mine,122792,49116,122792,fs);
+% [pxx10,f] = pwelch(Z_yama,122792,49116,122792,fs);
