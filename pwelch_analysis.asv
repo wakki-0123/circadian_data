@@ -1,4 +1,4 @@
-function pwelch_analysis(Z_maru,Z_hiki,Z_yasu,Z_kawa,Z_shima,Z_tuno,Z_huka,Z_huzi,Z_mine,Z_yama)
+function pwelch_analysis(Z_maru,Z_hiki,Z_yasu,Z_kawa,Z_shima,)
 %rng default
 fs=0.2;
 t=0:1/fs:5-2/fs;

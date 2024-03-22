@@ -1,6 +1,6 @@
- rng default
-   %daytime_num=datenum(daytime_hikiti_heartrate,'yyyy/mm/dd HH:MM:SS');
-   %xq=(datetime(2023,07,11,13,55,00):seconds(5):datetime(2023,08,01,21,33,00));
+function Resampling(daytime_hikiti_heartrate,)
+   daytime_num=datenum(daytime_hikiti_heartrate,'yyyy/mm/dd HH:MM:SS');
+   xq=(datetime(2023,07,11,13,55,00):seconds(5):datetime(2023,08,01,21,33,00));
   x=interpft(hikiti_heartrate_AllDay,368377);
  figure;
  plot(timedate, heartrate,'k-')
