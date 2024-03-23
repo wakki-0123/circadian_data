@@ -1,4 +1,4 @@
-function y1 = fuzzy_circadian_data(c,maxiter,m,factor,mf,rn,local,tau)
+function fuzzy_circadian_data(c,maxiter,m,factor,mf,rn,local,tau)
 
 % 瞳孔処理専用のプログラム
 % 元データの前処理とIAAFT、そしてファジーエントロピーを用いたマルチスケールファジーエントロピー解析
@@ -69,7 +69,7 @@ y_resampled = interp1(t_original, y, new_time_vector);
 
 
 y1 = y_resampled;
-y1 = zscore(y1);
+zscore(y1)
 
 
 %y = data; %元のデータを表示したいときはコメントを外す(欠損値だらけ)
