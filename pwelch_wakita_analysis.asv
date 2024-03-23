@@ -1,8 +1,6 @@
 function pwelch_wakita_analysis(data1,data2,data3,data4,data5,data6,data7,data8,data9,data10)
-
-% 心拍変動のパワー解析用の関数(全被験者の平均のパワー)
-
-fs=0.2; % sampling frequency
+% パワー解析用の関数
+fs=0.2;
 % 0323現在のワークスペースの変数に従って書いています
 Z_yasu = data1;
 Z_hiki = data2;
@@ -32,8 +30,8 @@ f_all = (f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8 + f9 + f10) / 10; % average of fr
 
 sd_all=std(pxx_all); % 標準偏差
 %pxx_all=mean(pxx_all);
-errp=pxx_all+sd_all; % エラーバー(上)
-errm=pxx_all-sd_all; % エラーバー(下)
+errp=pxx_all+sd_all; %
+errm=pxx_all-sd_all;
 figure('Name','Allperson power','NumberTitle','off');
 %semilogy(f,pxx)
 loglog(f_all,pxx_all,'-k');
@@ -48,5 +46,3 @@ ylim([100 1000000]);
 title('Allperson AllDay');
 xlabel('Frequency(Hz)');
 ylabel('Power');
-
-

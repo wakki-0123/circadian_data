@@ -1,10 +1,10 @@
 function y1 = fuzzy_circadian_data(c,maxiter,m,factor,mf,rn,local,tau)
 
-% 瞳孔処理専用のプログラム
+% 心拍変動のplotとmultiscale fuzzy entropy のプログラム
 % 元データの前処理とIAAFT、そしてファジーエントロピーを用いたマルチスケールファジーエントロピー解析
 
 %前処理
-%thredhold: filloutlinersにおける窓の大きさ
+
 
 %IAAFT
 % c: 元のデータに対して，位相をシャッフルしたデータの個数
@@ -22,12 +22,6 @@ function y1 = fuzzy_circadian_data(c,maxiter,m,factor,mf,rn,local,tau)
 file = 'fitbit_heartrate_修論用_安田.xlsx';
 %データの読み込み
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%file = 'before_pupil_diameter.csv'; %任意のファイルのパス
-%file1 = 'after_pupil_diameter.csv'
-% CSVファイルを読み取る
-
-% CSVファイルを読み取る
 % Excelファイルから数値データを読み込む
 [numData, ~, ~] = xlsread('fitbit_heartrate_修論用_安田.xlsx');
 
