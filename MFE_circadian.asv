@@ -1,6 +1,8 @@
-function MFE_circadian(c,maxiter,m,factor,mf,rn,local,tau,data1)
+function [e1MFE_circadian(c,maxiter,m,factor,mf,rn,local,tau,data1)
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% multiscale fuzzy entropy  専用の計算関数
+
+% Multiscale Fuzzy Entropy  専用の計算関数 (Circadian Rhythm用)
 
 
 %IAAFT
@@ -16,11 +18,11 @@ function MFE_circadian(c,maxiter,m,factor,mf,rn,local,tau,data1)
 % local=0;%global similarity
 % tau=1;%時間遅延は一つ次にする(sampleEnと同じ),
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+% 使用する心拍変動データの初期化
 y1 = data1;
-y1 = single(y1); % ここを変える可能性は高い
+%y1 = single(y1); % ここを変える可能性は高い(データを軽くしている)
 
-% Fuzzy Entropy を行う上で必要な関数が格納されているディレクトリの指定 
+% Fuzzy Entropy と IAAFT を行う上で必要な関数が格納されているディレクトリの指定 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 addpath 'C:\Users\iw200\OneDrive\ドキュメント\MATLAB\Examples\R2023b\matlab\git_pupil'
 
@@ -43,6 +45,7 @@ e2(:,i) = fuzzymsentropy(input2(:,i),m,mf,rn,local,tau,factor);
 end
 %転置行列(1000,10)→(10,1000) (factor,c)→(c,factor)
 e2 = e2';
+e_IAAFT = mean(e2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % グラフの表示(マルチスケールファジーエントロピー)
@@ -55,6 +58,6 @@ set(gca, 'XScale', 'log');
 hold off
 title('Heart Rate Multiscale Fuzzy Entropy');
 
-xlabel('Factor');
+xlabel('Scale');
 ylabel('Fuzzy Entropy');
 
