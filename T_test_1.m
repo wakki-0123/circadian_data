@@ -1,5 +1,8 @@
-function T_test_1(person_ans_heartrate_AllDay, person_IAAFT_MSEaverage_AllDay,alpha)
+function T_test_1(person_ans_heartrate_AllDay, person_IAAFT_MSEaverage_AllDay)
 % 対標本t検定を実行
+
+
+
 [h, p, ci, stats]=ttest(person_ans_heartrate_AllDay, person_IAAFT_MSEaverage_AllDay);
 
 % 結果の表示
@@ -7,7 +10,7 @@ fprintf('t統計量: %.4f\n', stats.tstat);
 fprintf('p値: %.4f\n', p);
 
 % 有意水準を設定
-%alpha = 0.05;
+alpha = 0.05;
 
 % p値を用いて帰無仮説の棄却/採択を判断
 if p < alpha
@@ -31,6 +34,9 @@ for i = 1:12000
 
     x=person_ans_heartrate_AllDay_1(:,1);
     y=person_IAAFT_MSEaverage_AllDay_1(:,1);
+
+
+    
 
     disp(x)
 
