@@ -20,6 +20,8 @@ function [e1,e_IAAFT] = MFE_circadian(c,maxiter,m,factor,mf,rn,local,tau,data1)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 使用する心拍変動データの初期化
 y1 = data1;
+l1 = length(y1);
+
 %y1 = single(y1); % ここを変える可能性は高い(データを軽くしている)
 
 % Fuzzy Entropy と IAAFT を行う上で必要な関数が格納されているディレクトリの指定 
@@ -48,11 +50,16 @@ e2 = e2';
 e_IAAFT = mean(e2);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+time_length = l1 * 5;
+for i=1:factor
+time_s(i) = l1 / i;
+time(i) = time_length / time_s(i);
+end
 % グラフの表示(マルチスケールファジーエントロピー)
 figure('Name','HeartRate of Multiscale Fuzzy Entropy','NumberTitle','off')
-plot(1:1:factor,e1,'r')
+plot(time,e1,'r')
 hold on
-errorbar(1:1:factor,mean(e2),std(e2),'b');
+errorbar(time,mean(e2),std(e2),'b');
 legend('ORG','IAAFT','Location','southeast');
 set(gca, 'XScale', 'log');
 hold off
