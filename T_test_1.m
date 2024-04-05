@@ -25,7 +25,7 @@ end
 alpha = 0.05;
 
 % ループを使用してデータごとに対標本t検定を実行
-for i = 1:1000 % 前は12000
+for i = 1:10000 % 前は12000
 %     disp(['MSE: ',num2str(person_ans_heartrate_AllDay_1(i))]);
 %     disp(['IAAFTafMSE: ',num2str(person_IAAFT_MSEaverage_AllDay_1(i))]);    
 % 
