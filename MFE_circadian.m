@@ -56,7 +56,8 @@ time_s(i) = l1 / i;
 time(i) = time_length / time_s(i);
 end
 % グラフの表示(マルチスケールファジーエントロピー)
-figure('Name','HeartRate of Multiscale Fuzzy Entropy','NumberTitle','off')
+%figure('Name','HeartRate of Multiscale Fuzzy Entropy','NumberTitle','off')
+figure;
 plot(time,e1,'r')
 hold on
 errorbar(time,mean(e2),std(e2),'b');
@@ -65,6 +66,6 @@ set(gca, 'XScale', 'log');
 hold off
 title('Heart Rate Multiscale Fuzzy Entropy');
 
-xlabel('Scale');
+xlabel('Time Scale');
 ylabel('Fuzzy Entropy');
 
