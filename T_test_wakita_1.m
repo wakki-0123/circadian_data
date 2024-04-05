@@ -16,9 +16,9 @@ fprintf('補正されたp値: %.4f\n', p_corrected);
 alpha = 0.05;
 
 % p値を用いて帰無仮説の棄却/採択を判断
-if p_corrected < alpha
+if p < alpha
     fprintf('帰無仮説を棄却: サンプル間に統計的に有意な違いがあります\n');
 else
     fprintf('帰無仮説を採択: サンプル間に統計的に有意な違いがありません\n');
 end
-p1 = p_corrected;
+p1 = p;

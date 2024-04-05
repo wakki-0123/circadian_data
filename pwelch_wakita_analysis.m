@@ -46,6 +46,7 @@ loglog(f_all,errm,'--b');
 grid on;
 ylim([100 1000000]);
 title('Allperson AllDay');
+legend('ORG','ERRORBAR','Location','southeast');
 xlabel('Frequency(Hz)');
 ylabel('Power');
 
