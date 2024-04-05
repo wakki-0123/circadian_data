@@ -1,6 +1,9 @@
 function [e_all, e_IAAFT_all] = MFE_circadian_multiple(data_cell, c, maxiter, m, factor, mf, rn, local, tau)
 % MFE_circadian_multiple: Circadian Rhythm用の複数データを処理する関数
 
+% 0405に実行したプログラム
+% MFE_circadian_multiple(data_cell,10,50,2,10000,'Exponential',[0.2 2],0,1);
+
 % データの数
 num_data = numel(data_cell);
 
