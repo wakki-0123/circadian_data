@@ -1,0 +1,15 @@
+function p_corrected_bonf = T_test_0410(person_ans_heartrate_AllDay, person_IAAFT_MSEaverage_AllDay)
+
+data1 = person_ans_heartrate_AllDay;
+data2 = person_IAAFT_MSEaverage_AllDay;
+
+for j=1:10
+    for i=1:10000
+    ttest(data1(j,i),data2(j,i));
+    end
+end
+
+
+
+
+
