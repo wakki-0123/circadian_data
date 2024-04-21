@@ -9,14 +9,14 @@ q = zeros(length(p_hc), 1);
 pi = 0.05;
 
 m = length(p_hc);
-threshold_p_hc = 0;
+%threshold_p_hc = 0;
 
 for i = m:-1:1
     a = (i / m) * pi;
     try
         q(i) = a;
         if p_hc(i) <= q(i)
-            threshold_p_hc = a;
+            %threshold_p_hc = a;
             fprintf(2, 'HC: p値のしきい値: %f, %f; %f\n', a, p_hc(i), t_atai(p_hc_I(i)));
             break
         end
