@@ -9,7 +9,7 @@ function [p,t] = T_test_0410(data1, data2)
 alpha = 0.05;
 
 % 各データ点のペアに対してt検定を実行
-for i = 1:1000
+for i = 1:10000
 
     [h, p(i), ci, stats] = ttest(data1(:,i), data2(:,i));
     t(i) = stats.tstat;
