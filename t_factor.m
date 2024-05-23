@@ -21,15 +21,19 @@ end
 
 
     figure;
-    plot(time, t_atai);      % t_atai をプロット
+    plot(time, t_atai,'Color',[0 0 0]);      % t_atai をプロット
     hold on;
-    plot(time, t_kyoukai_plus,'-r');   % t_kyoukai_plus をプロット
-    plot(time, t_kyoukai_minus,'-b');  % t_kyoukai_minus をプロット
+    plot(time, t_kyoukai_plus,'--r');   % t_kyoukai_plus をプロット
+    plot(time, t_kyoukai_minus,'--b');  % t_kyoukai_minus をプロット
     hold off;
     set(gca, 'XScale', 'log');   % X軸を対数スケールに設定
+    grid on
     xlim([time(1) time(10000)])
-    xlabel('Time_scale');             % X軸ラベルを設定
+    xlabel('Time Scale [sec]');             % X軸ラベルを設定
     ylabel('t-Value');             % Y軸ラベルを設定
-    legend('t値', 'FDR後の補正後の閾値', 'FDR後の補正後の閾値','Location', 'southeast');  % 凡例を追加
+    lgd = legend('t-value', 'Corrected threshold after FDR', 'Corrected threshold after FDR','Location', 'southeast');  % 凡例を追加
+    lgd.FontSize = 40;
+    ax = gca;
+    ax.FontSize = 40;
     %title('Plot of t\_atai, t\_kyoukai\_plus, and t\_kyoukai\_minus');  % タイトルを追加
 end

@@ -41,13 +41,17 @@ hold on;
 loglog(f_all,errp,'--b');
 hold on;
 loglog(f_all,errm,'--b');
+ax = gca;
+ax.FontSize = 40;
 
 
 grid on;
 ylim([100 1000000]);
-title('Allperson AllDay');
-legend('ORG','ERRORBAR','Location','southeast');
+
+lgd = legend('ORG','ERRORBAR','Location','southeast');
+lgd.FontSize = 40;
 xlabel('Frequency(Hz)');
 ylabel('Power');
 
-
+ax = gca;
+ax.FontSize = 40;
