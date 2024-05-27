@@ -31,9 +31,9 @@ end
     xlim([time(1) time(10000)])
     xlabel('Time Scale [sec]');             % X軸ラベルを設定
     ylabel('t-Value');             % Y軸ラベルを設定
-    lgd = legend('t-value', 'Corrected threshold after FDR', 'Corrected threshold after FDR','Location', 'southeast');  % 凡例を追加
-    lgd.FontSize = 40;
+    lgd = legend('t-value', 'Upper threshold  t-Value corresponding to q<0.05', 'lower threshold  t-Value corresponding to q<0.05','Location', 'southeast');  % 凡例を追加
+    lgd.FontSize = 27;
     ax = gca;
-    ax.FontSize = 40;
+    ax.FontSize = 45;
     %title('Plot of t\_atai, t\_kyoukai\_plus, and t\_kyoukai\_minus');  % タイトルを追加
 end
