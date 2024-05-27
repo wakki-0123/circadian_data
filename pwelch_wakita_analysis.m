@@ -36,11 +36,11 @@ errp=pxx_all+sd_all; % エラーバー(上)
 errm=pxx_all-sd_all; % エラーバー(下)
 figure('Name','Allperson power','NumberTitle','off');
 %semilogy(f,pxx)
-loglog(f_all,pxx_all,'-k');
+loglog(f_all,pxx_all,'-k','LineWidth',4);
 hold on;
-loglog(f_all,errp,'--b');
+loglog(f_all,errp,'--b','LineWidth',2);
 hold on;
-loglog(f_all,errm,'--b');
+loglog(f_all,errm,'--b','LineWidth',2);
 ax = gca;
 ax.FontSize = 40;
 
@@ -48,7 +48,7 @@ ax.FontSize = 40;
 grid on;
 ylim([100 1000000]);
 
-lgd = legend('ORG','ERRORBAR','Location','southeast');
+lgd = legend('MEAN','STD','Location','southeast');
 lgd.FontSize = 40;
 xlabel('Frequency(Hz)');
 ylabel('Power');

@@ -21,17 +21,17 @@ end
 
 
     figure;
-    plot(time, t_atai,'Color',[0 0 0]);      % t_atai をプロット
+    plot(time, t_atai,'Color',[0 0 0],'LineWidth',5);      % t_atai をプロット
     hold on;
-    plot(time, t_kyoukai_plus,'--r');   % t_kyoukai_plus をプロット
-    plot(time, t_kyoukai_minus,'--b');  % t_kyoukai_minus をプロット
+    plot(time, t_kyoukai_plus,'--r','LineWidth',3);   % t_kyoukai_plus をプロット
+    plot(time, t_kyoukai_minus,'--b','LineWidth',3);  % t_kyoukai_minus をプロット
     hold off;
     set(gca, 'XScale', 'log');   % X軸を対数スケールに設定
     grid on
     xlim([time(1) time(10000)])
     xlabel('Time Scale [sec]');             % X軸ラベルを設定
-    ylabel('t-Value');             % Y軸ラベルを設定
-    lgd = legend('t-value', 'Upper threshold  t-Value corresponding to q<0.05', 'lower threshold  t-Value corresponding to q<0.05','Location', 'southeast');  % 凡例を追加
+    ylabel('t-value');             % Y軸ラベルを設定
+    lgd = legend('t-value', 'Upper threshold  t-value corresponding to q<0.05', 'lower threshold  t-value corresponding to q<0.05','Location', 'southeast');  % 凡例を追加
     lgd.FontSize = 27;
     ax = gca;
     ax.FontSize = 45;
