@@ -1,7 +1,7 @@
 function y1 = heartrate_plot()
 
 % 心拍変動を表示するための関数
-file = 'fitbit_heartrate_修論用_峯岸.xlsx';
+file = 'fitbit_heartrate_修論用_角田.xlsx';
 %データの読み込み
 % file: 任意の被験者のファイル名
 
