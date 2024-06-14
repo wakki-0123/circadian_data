@@ -18,7 +18,7 @@ for i = m:-1:1
         if p_hc(i) <= q(i)
             %threshold_p_hc = a;
             fprintf(2, 'HC: p値のしきい値: %f, %f; %f\n', a, p_hc(i), t_atai(p_hc_I(i)));
-            break
+                        break
         end
     catch
         % 例外を処理する（必要に応じて）
