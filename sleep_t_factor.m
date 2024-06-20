@@ -1,9 +1,9 @@
-function sleep_t_factor(t_atai,scale)
+function sleep_t_factor(sleep_correlation_coefficients,scale)
    % t_kyoukai_plus = 4.057735 * ones(1, 10000);  
    % t_kyoukai_minus = -4.057735 * ones(1, 10000); 
 % Fuzzy
-    t_kyoukai_plus = 4.024922 * ones(1, scale);  
-    t_kyoukai_minus = -4.024922 * ones(1, scale); 
+    t_kyoukai_plus = 0.818182 * ones(1, scale);  
+    t_kyoukai_minus = -0.818182 * ones(1, scale); 
 
    % MSE
     % t_kyoukai_plus = 3.195322 * ones(1, 1000);  
@@ -22,7 +22,7 @@ for i = 1:scale
 end
 
     figure;
-    plot(time,t_atai,'Color',[0 0 0],'LineWidth',5);      % t_atai をプロット
+    plot(time,sleep_correlation_coefficients,'Color',[0 0 0],'LineWidth',5);      % t_atai をプロット
     hold on;
     plot(time,t_kyoukai_plus,'--r','LineWidth',3);   % t_kyoukai_plus をプロット
     plot(time,t_kyoukai_minus,'--b','LineWidth',3);  % t_kyoukai_minus をプロット
@@ -33,7 +33,7 @@ end
     grid on
     
     xlabel('Time Scale');             % X軸ラベルを設定
-    ylabel('t-value');             % Y軸ラベルを設定
+    ylabel('correlation coefficients');             % Y軸ラベルを設定
     lgd = legend('t-value', 'Upper threshold  t-value corresponding to q<0.05', 'lower threshold  t-value corresponding to q<0.05','Location', 'southeast');  % 凡例を追加
     lgd.FontSize = 20;
     ax = gca;
