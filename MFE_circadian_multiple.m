@@ -12,7 +12,7 @@ e_all = cell(1, num_data);
 e_IAAFT_all = cell(1, num_data);
 q = 0;
 
-for data_index = 1:num_data
+for data_index = 1:2
     % 各データを取得
     q = q + 1;
     data = data_cell{data_index};
@@ -82,3 +82,21 @@ xlabel('Time Scale');
 ylabel('Fuzzy Entropy');
 
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% 0627 add
+% function e = fuzzymsentropy(input, m, mf, rn, local, tau, factor)
+%     y = input;
+%     y = (y - mean(y)) / std(y);
+% 
+%     e = zeros(1, factor);
+%     for i = 1:factor
+%         if i == 1
+%             s = y;
+%         else
+%             s = coarsegraining(y, i);
+%         end
+%         e(i) = FuzEn_MFs(s, m, mf, rn, local, tau);
+%     end
+%     e = e';
+% end
+

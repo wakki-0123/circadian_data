@@ -1,4 +1,4 @@
-function [p_values,t_values] = sleep_scatter(e_all_array_0411,upper)
+function [p_values,t_values] = sleep_scatter(e_all_array_0411) %upper
     % 暫定 被験者の対応はまた詳しく調べる(どうやら合っていそう)
     test_score = [0.886324022, 0.866727644, 0.911264649, 0.877716281, 0.885269186, 0.855124121, 0.871734582, 0.859731051, 0.900972038, 0.854969546];
     entropy = e_all_array_0411;
