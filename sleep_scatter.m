@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 function [p_values,t_values] = sleep_scatter(e_all_array_0411) %upper
+=======
+function [p_values,correlation_coefficients] = sleep_scatter(e_all_array_0411,upper)
+>>>>>>> 3889117e618c4621b4d664601ba6ddf8cd3b5b1d
     % 暫定 被験者の対応はまた詳しく調べる(どうやら合っていそう)
     test_score = [0.886324022, 0.866727644, 0.911264649, 0.877716281, 0.885269186, 0.855124121, 0.871734582, 0.859731051, 0.900972038, 0.854969546];
     entropy = e_all_array_0411;
@@ -19,6 +23,7 @@ function [p_values,t_values] = sleep_scatter(e_all_array_0411) %upper
         [correlation_coefficients(i),p_values(i)] = corr(E_person(:, i), test_score','Type','Spearman');
         n= num; % サンプル数
         t_values(i) = correlation_coefficients(i) * sqrt((n - 2) / (1 - correlation_coefficients(i)^2));
+
 
     end
 
