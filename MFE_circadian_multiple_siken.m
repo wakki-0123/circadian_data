@@ -10,15 +10,16 @@ function [e_all, e_IAAFT_all] = MFE_circadian_multiple_siken(data_cell, c, maxit
     % afterEach(q_lock, @(data) assignin('base', 'q_lock', evalin('base', 'q_lock') + data));
 
     % 結果を保存するためのプレースホルダ
-    numData = numel(data_cell);
+    %numData = numel(data_cell);
+    numData = 1;
     e_all = cell(1, numData);
     e_IAAFT_all = cell(1, numData);
     e_IAAFT_std = cell(1, numData);
-    pool = parpool(10);
+    %pool = parpool(2);
 
 
    
-        parfor data_index = 1:numData
+        for data_index = 5
         % 各データを取得
         data = data_cell{data_index};
         
@@ -36,7 +37,7 @@ function [e_all, e_IAAFT_all] = MFE_circadian_multiple_siken(data_cell, c, maxit
         disp(data_index);
         end
         % プールを閉じる
-        delete(pool);
+        %delete(pool);
         
         
 
@@ -49,6 +50,7 @@ function [e_all, e_IAAFT_all] = MFE_circadian_multiple_siken(data_cell, c, maxit
     
     data_l2 = factor; % 長さを求める
     disp(data_l2);
+
 
     ex = cell2mat(e_all);
     ex = reshape(ex, numData, data_l2);
@@ -249,6 +251,7 @@ end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 正しいやつ
 function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
 
 if nargin == 5, tau = 1; end
@@ -278,9 +281,11 @@ end
 
 % inter-vector distance
 % if N < 1e4
+    ym = single(ym);
     cheb = pdist(ym, 'chebychev'); % inf-norm
     cm   = feval(mf, cheb, rn);
 
+    ya = single(ya);
     cheb = pdist(ya, 'chebychev');
     ca   = feval(mf, cheb, rn);
 
@@ -289,6 +294,55 @@ entr = -log(sum(ca) / sum(cm));
 clear indm ym inda ya cheb cm ca;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
+% 
+% if nargin == 5, tau = 1; end
+% if nargin == 4, local = 0; tau=1; end
+% if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
+% 
+% % parse inputs
+% narginchk(6, 6);
+% N     = length(ts);
+% 
+% % normalization
+% %ts = zscore(ts(:));
+% 
+% % reconstruction
+% indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
+% indm = indm(:, 1:tau:end);
+% ym   = ts(indm);
+% 
+% inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
+% inda = inda(:, 1:tau:end);
+% ya   = ts(inda);
+% 
+% if local
+%     ym = ym - mean(ym, 2)*ones(1, m);
+%     ya = ya - mean(ya, 2)*ones(1, m+1);
+% end
+% 
+% % inter-vector distance calculation
+% cheb_ym = zeros(size(ym, 1), size(ym, 1));
+% for i = 1:size(ym, 1)
+%     cheb_ym(i, :) = max(abs(ym - ym(i, :)), [], 2)';
+% end
+% cm = feval(mf, cheb_ym, rn);
+% 
+% cheb_ya = zeros(size(ya, 1), size(ya, 1));
+% for i = 1:size(ya, 1)
+%     cheb_ya(i, :) = max(abs(ya - ya(i, :)), [], 2)';
+% end
+% ca = feval(mf, cheb_ya, rn);
+% 
+% % output
+% entr = -log(sum(ca) / sum(cm));
+% 
+% % clear variables
+% clear indm ym inda ya cheb_ym cheb_ya cm ca;
+% 
+% end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
 %     if nargin == 5, tau = 1; end
 %     if nargin == 4, local = 0; tau=1; end
