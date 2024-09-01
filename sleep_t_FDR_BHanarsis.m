@@ -21,6 +21,7 @@ for i = m:-1:1
         end
     catch
         % 例外を処理する（必要に応じて）
+        disp("NO")
     end
 end
 

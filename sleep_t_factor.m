@@ -2,8 +2,8 @@ function sleep_t_factor(sleep_correlation_coefficients,scale)
    % t_kyoukai_plus = 4.057735 * ones(1, 10000);  
    % t_kyoukai_minus = -4.057735 * ones(1, 10000); 
 % Fuzzy
-    t_kyoukai_plus = 0.818182 * ones(1, scale);  
-    t_kyoukai_minus = -0.818182 * ones(1, scale); 
+    t_kyoukai_plus = 2.468854 * ones(1, scale);  
+    t_kyoukai_minus = -2.468854 * ones(1, scale); 
 
    % MSE
     % t_kyoukai_plus = 3.195322 * ones(1, 1000);  

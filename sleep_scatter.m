@@ -1,14 +1,11 @@
-<<<<<<< HEAD
-function [p_values,t_values] = sleep_scatter(e_all_array_0411) %upper
-=======
-function [p_values,correlation_coefficients] = sleep_scatter(e_all_array_0411,upper)
->>>>>>> 3889117e618c4621b4d664601ba6ddf8cd3b5b1d
+
+function [p_values,correlation_coefficients] = sleep_scatter(e_all_array_0411)
     % 暫定 被験者の対応はまた詳しく調べる(どうやら合っていそう)
-    test_score = [0.886324022, 0.866727644, 0.911264649, 0.877716281, 0.885269186, 0.855124121, 0.871734582, 0.859731051, 0.900972038, 0.854969546];
+    test_score = [0.8519555, 0.894203152];
     entropy = e_all_array_0411;
-    num = 10;
+    num = 2;
     scale = 200;
-    
+
     % E_person を初期化
     E_person = zeros(num, scale);
 
@@ -30,12 +27,13 @@ function [p_values,correlation_coefficients] = sleep_scatter(e_all_array_0411,up
     % 相関係数を表示
     %disp('相関係数:');
     %disp(correlation_coefficients);
-    disp(p_values)
+    %disp(p_values)
     %disp(t_values)
-    
+
     % 図の作成
     figure;
-    plot(1:scale, correlation_coefficients, 'b-', 'LineWidth', 2);
+    %plot(1:scale, correlation_coefficients, 'b-', 'LineWidth', 2);
+    scatter(1:scale, correlation_coefficients, 'filled');
     xlabel('Time Scale');
     ylabel('Spearman Correlation Coefficient');
     title('Correlation Coefficients over Different Time Scales');
@@ -44,7 +42,7 @@ function [p_values,correlation_coefficients] = sleep_scatter(e_all_array_0411,up
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 % 

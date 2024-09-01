@@ -3,7 +3,7 @@ function [e_all, e_IAAFT_all] = MFE_circadian_multiple(data_cell, c, maxiter, m,
 
 % 0405に実行したプログラム
 % MFE_circadian_multiple(data_cell,10,50,2,10000,'Exponential',[0.2 2],0,1);
-
+tic; % 時間計測用
 % データの数
 num_data = numel(data_cell);
 
@@ -12,7 +12,7 @@ e_all = cell(1, num_data);
 e_IAAFT_all = cell(1, num_data);
 q = 0;
 
-for data_index = 1:10
+for data_index = 1:2
     % 各データを取得
     q = q + 1;
     data = data_cell{data_index};
@@ -27,7 +27,7 @@ for data_index = 1:10
     disp("現在の稼働状況10段階 (全体でどのくらい進んでいるか)")
     disp(q)
 end
-
+toc;    % 時間計測用
 end
 
 function [e1, e_IAAFT] = MFE_circadian_single(data, c, maxiter, m, factor, mf, rn, local, tau, data_l)

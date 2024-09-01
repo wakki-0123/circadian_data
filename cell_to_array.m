@@ -1,22 +1,14 @@
-function [values,means1] = cell_to_array(e_all,e_IAAFT_all)
-% 要素数を取得
-num_elements = numel(e_all{1});
-num_elements1 = numel(e_IAAFT_all{1});
- % 平均値を格納する配列を作成
-means1 = zeros(1, num_elements1); 
-
-for i = 1:num_elements
-    % 各要素番号ごとの値を取得
-    values = cellfun(@(x) x(i), e_all);
-    values1 = cellfun(@(x) x(i), e_IAAFT_all);
-
-    % 平均を計算して格納
-    %means(i) = mean(values);
-    means1(i) = mean(values1);
-
+function [values] = cell_to_array(e_all)
+    % 各セルの中にある配列の長さを取得
+    num_elements = numel(e_all{1});
+    
+    % 行列の初期化 (行数はセル配列の数、列数は各配列の長さ)
+    num_cells = numel(e_all);
+    values = zeros(num_cells, num_elements);
+    
+    % 各要素を行列に格納
+    for i = 1:num_elements
+        % 各セル配列の i 番目の要素を行列の i 番目の列に格納
+        values(:, i) = cellfun(@(x) x(i), e_all);
+    end
 end
-
-% 結果を表示
-disp('平均値:');
-disp(values);
-disp(means1);
