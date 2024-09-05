@@ -13,10 +13,14 @@
 % data_cell{10} = data10;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% size 1*2 version
+%size 1*2 version
 function data_cell = data_to_cell(data1,data2)
 data_cell = cell(1, 2);
 data_cell{1} = data1;
 data_cell{2} = data2;
-
-
+% 
+% 
+% function data_cell = data_to_cell(data1)
+% data_cell = cell(1, 1);
+% data_cell{1} = data1;
+% 

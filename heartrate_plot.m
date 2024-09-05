@@ -1,7 +1,7 @@
 function y1 = heartrate_plot()
 
 % 心拍変動を表示するための関数
-file = 'C:/Users/iw200/Desktop/NEW_heartrate_kari/asato_heartrate.xlsx';
+file = 'C:/Users/iw200/Desktop/NEW_heartrate_kari/wakita_heartrate.xlsx';
 %データの読み込み
 % file: 任意の被験者のファイル名
 

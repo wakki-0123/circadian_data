@@ -15,11 +15,11 @@ function [e_all, e_IAAFT_all] = MFE_circadian_multiple_siken(data_cell, c, maxit
     e_all = cell(1, numData);
     e_IAAFT_all = cell(1, numData);
     e_IAAFT_std = cell(1, numData);
-    %pool = parpool(2);
+    pool = parpool(2);
 
 
    
-        for data_index = 5
+        parfor data_index = 1:2
         % 各データを取得
         data = data_cell{data_index};
         
@@ -37,7 +37,7 @@ function [e_all, e_IAAFT_all] = MFE_circadian_multiple_siken(data_cell, c, maxit
         disp(data_index);
         end
         % プールを閉じる
-        %delete(pool);
+        delete(pool);
         
         
 
@@ -65,7 +65,7 @@ function [e_all, e_IAAFT_all] = MFE_circadian_multiple_siken(data_cell, c, maxit
     ez = reshape(ez, numData, data_l2);
     disp(size(ez));
 
-    for j=1:numData
+    for j=1:2
     plot_MFE_graph(ex(j,:), ey(j,:), ez(j,:), data_l2);
     disp('表示回数')
     disp(j)
@@ -81,31 +81,26 @@ end
 
 
 function [e1, e_IAAFT_mean, e_std] = MFE_circadian_single(data, c, maxiter, m, factor, mf, rn, local, tau)
-    % MFE_circadian_single: 単一のデータに対してマルチスケールファジーエントロピーとIAAFTを計算する関数
+    % Transfer data to GPU
+    data_gpu = gpuArray(data);
 
-    % マルチスケールファジーエントロピーの計算
-    e1 = fuzzymsentropy(data, m, mf, rn, local, tau, factor);
+    % Calculate MFE using GPU
+    e1 = fuzzymsentropy(data_gpu, m, mf, rn, local, tau, factor);
 
-    % IAAFTを実行し、その結果のマルチスケールファジーエントロピーを計算
-    e2 = zeros(factor, c);
-    [s, ~] = IAAFT(data, c, maxiter);
+    % Perform IAAFT and calculate MFE on surrogates using GPU
+    e2 = zeros(factor, c, 'gpuArray');
+    [s, ~] = IAAFT(data_gpu, c, maxiter);
 
-    % サロゲートデータのマルチスケールファジーエントロピーを計算
-    
     for i = 1:c
         e2(:, i) = fuzzymsentropy(s(:, i), m, mf, rn, local, tau, factor);
         disp("現在のサロゲートデータに関するファジーエントロピーの様子")
         disp(i)
     end
 
-    % 転置行列
-    e2 = e2';
-    e_IAAFT_mean = mean(e2);
-    e_std = std(e2);
-   
-    % グラフの表示
-    %plot_MFE_graph(e1, e2, data_l);
-
+    % Compute mean and standard deviation on the GPU
+    e2 = gather(e2'); % gather to bring it back to CPU if needed
+    e_IAAFT_mean = mean(e2, 1);
+    e_std = std(e2, 0, 1);
 end
 
 function plot_MFE_graph(e1, e2, e3, data_l)
@@ -138,20 +133,19 @@ ylabel('Fuzzy Entropy');
 end
 
 function e = fuzzymsentropy(input, m, mf, rn, local, tau, factor)
-    y = input;
+    y = gpuArray(input); % Move input data to GPU
     y = y - mean(y);
     y = y / std(y);
-    e = zeros(factor, 1);
-    %pool = parpool(10);
+    e = zeros(factor, 1, 'gpuArray'); % Use GPU for storage
     
     for i = 1:factor
-        s = coarsegraining(y, i);
+        s = coarsegraining(y, i); % Modify coarsegraining if needed for GPU
         sampe = FuzEn_MFs(s, m, mf, rn, local, tau);
         e(i) = sampe;
     end
-    e = e';
-    
+    e = gather(e'); % gather results back to CPU if needed
 end
+
 
 
 
@@ -252,6 +246,42 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 正しいやつ
+% function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
+%     if nargin == 5, tau = 1; end
+%     if nargin == 4, local = 0; tau=1; end
+%     if nargin == 3, rn=0.2*std(ts); local = 0; tau=1; end
+% 
+%     % Normalization
+%     ts_gpu = gpuArray(ts);  % Move to GPU
+% 
+%     % Reconstruction
+%     indm = hankel(1:length(ts_gpu)-m*tau, length(ts_gpu)-m*tau:length(ts_gpu)-tau); % indexing elements for dim-m
+%     indm = gpuArray(indm(:, 1:tau:end));
+%     ym = ts_gpu(indm);
+% 
+%     inda = hankel(1:length(ts_gpu)-m*tau, length(ts_gpu)-m*tau:length(ts_gpu)); % for dim-m+1
+%     inda = gpuArray(inda(:, 1:tau:end));
+%     ya = ts_gpu(inda);
+% 
+%     if local
+%         ym = ym - mean(ym, 2)*ones(1, m, 'gpuArray');
+%         ya = ya - mean(ya, 2)*ones(1, m+1, 'gpuArray');
+%     end
+% 
+%     % Inter-vector distance (on GPU)
+%     cheb_m = pdist(ym, 'chebychev', 'gpuArray'); % inf-norm
+%     cm = feval(mf, cheb_m, rn);
+% 
+%     cheb_a = pdist(ya, 'chebychev', 'gpuArray');
+%     ca = feval(mf, cheb_a, rn);
+% 
+%     % Output
+%     entr = -log(sum(ca) / sum(cm));
+%     entr = gather(entr); % gather results back to CPU if needed
+% end
+% 
+
+
 function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
 
 if nargin == 5, tau = 1; end
@@ -279,120 +309,30 @@ if local
     ya = ya - mean(ya, 2)*ones(1, m+1);
 end
 
-% inter-vector distance
-% if N < 1e4
-    ym = single(ym);
-    cheb = pdist(ym, 'chebychev'); % inf-norm
-    cm   = feval(mf, cheb, rn);
+% Inter-vector distance with batch processing
+batch_size = 1000;  % Adjust this value based on available memory
+num_batches = ceil(size(ym, 1) / batch_size);
+cm = zeros(size(ym, 1), 1);
+ca = zeros(size(ya, 1), 1);
 
-    ya = single(ya);
-    cheb = pdist(ya, 'chebychev');
-    ca   = feval(mf, cheb, rn);
+for i = 1:num_batches
+    batch_start = (i-1)*batch_size + 1;
+    batch_end = min(i*batch_size, size(ym, 1));
+    
+    cheb_m_batch = pdist2(ym(batch_start:batch_end, :), ym, 'chebychev');
+    cm(batch_start:batch_end) = max(cheb_m_batch, [], 2);
+    
+    cheb_a_batch = pdist2(ya(batch_start:batch_end, :), ya, 'chebychev');
+    ca(batch_start:batch_end) = max(cheb_a_batch, [], 2);
+end
+
+cm = feval(mf, cm, rn);
+ca = feval(mf, ca, rn);
 
 % output
 entr = -log(sum(ca) / sum(cm));
 clear indm ym inda ya cheb cm ca;
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-% 
-% if nargin == 5, tau = 1; end
-% if nargin == 4, local = 0; tau=1; end
-% if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
-% 
-% % parse inputs
-% narginchk(6, 6);
-% N     = length(ts);
-% 
-% % normalization
-% %ts = zscore(ts(:));
-% 
-% % reconstruction
-% indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
-% indm = indm(:, 1:tau:end);
-% ym   = ts(indm);
-% 
-% inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
-% inda = inda(:, 1:tau:end);
-% ya   = ts(inda);
-% 
-% if local
-%     ym = ym - mean(ym, 2)*ones(1, m);
-%     ya = ya - mean(ya, 2)*ones(1, m+1);
-% end
-% 
-% % inter-vector distance calculation
-% cheb_ym = zeros(size(ym, 1), size(ym, 1));
-% for i = 1:size(ym, 1)
-%     cheb_ym(i, :) = max(abs(ym - ym(i, :)), [], 2)';
-% end
-% cm = feval(mf, cheb_ym, rn);
-% 
-% cheb_ya = zeros(size(ya, 1), size(ya, 1));
-% for i = 1:size(ya, 1)
-%     cheb_ya(i, :) = max(abs(ya - ya(i, :)), [], 2)';
-% end
-% ca = feval(mf, cheb_ya, rn);
-% 
-% % output
-% entr = -log(sum(ca) / sum(cm));
-% 
-% % clear variables
-% clear indm ym inda ya cheb_ym cheb_ya cm ca;
-% 
-% end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-%     if nargin == 5, tau = 1; end
-%     if nargin == 4, local = 0; tau=1; end
-%     if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
-% 
-%     % parse inputs
-%     narginchk(6, 6);
-% 
-%     N = length(ts);
-% 
-%     % reconstruction
-%     indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
-%     indm = indm(:, 1:tau:end);
-%     ym   = ts(indm);
-% 
-%     inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
-%     inda = inda(:, 1:tau:end);
-%     ya   = ts(inda);
-% 
-%     if local
-%         ym = ym - mean(ym, 2)*ones(1, m);
-%         ya = ya - mean(ya, 2)*ones(1, m+1);
-%     end
-% 
-%     % Initialize sums for calculating cm and ca
-%     sum_cm = 0;
-%     sum_ca = 0;
-% 
-%     % Calculate distances and accumulate results
-%     for i = 1:size(ym, 1)
-%         for j = i+1:size(ym, 1)
-%             cheb_m = max(abs(ym(i, :) - ym(j, :)));
-%             cm = feval(mf, cheb_m, rn);
-%             sum_cm = sum_cm + cm;
-%         end
-%     end
-% 
-%     for i = 1:size(ya, 1)
-%         for j = i+1:size(ya, 1)
-%             cheb_a = max(abs(ya(i, :) - ya(j, :)));
-%             ca = feval(mf, cheb_a, rn);
-%             sum_ca = sum_ca + ca;
-%         end
-%     end
-% 
-%     % Output
-%     entr = -log(sum_ca / sum_cm);
-%     clear indm ym inda ya cheb_m cheb_a cm ca;
-% end
-
 
 %membership functions
 function c = Triangular(dist, rn)
@@ -432,98 +372,3 @@ end
 function c = Exponential(dist, rn)
     c = exp(-dist .^ rn(2) ./ rn(1));
 end
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-% if nargin == 5, tau = 1; end
-% if nargin == 4, local = 0; tau=1; end
-% if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
-% 
-% % parse inputs
-%     narginchk(6, 6);
-% 
-%     N = length(ts);
-% 
-%     % reconstruction
-%     indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
-%     indm = indm(:, 1:tau:end);
-%     ym   = ts(indm);
-% 
-%     inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
-%     inda = inda(:, 1:tau:end);
-%     ya   = ts(inda);
-% 
-%     if local
-%         ym = ym - mean(ym, 2)*ones(1, m);
-%         ya = ya - mean(ya, 2)*ones(1, m+1);
-%     end
-% 
-%     % Batch processing parameters
-%     batchSize = 1000; % バッチサイズ
-%     numBatches = ceil((N - m * tau) / batchSize);
-% 
-%     % Initialize cell arrays to store batch results
-%     cm_cell = cell(1, numBatches);
-%     ca_cell = cell(1, numBatches);
-% 
-%     % Perform batch processing
-%     for b = 1:numBatches
-%         startIdx = (b - 1) * batchSize + 1;
-%         endIdx = min(b * batchSize, N - m * tau);
-% 
-%         % Calculate distances for this batch
-%         cheb_m = pdist(ym(startIdx:endIdx, :), 'chebychev'); % inf-norm
-%         %disp(size(cheb_m));
-%         cm_cell{b} = feval(mf, cheb_m, rn);
-% 
-%         cheb_a = pdist(ya(startIdx:endIdx, :), 'chebychev');
-%         ca_cell{b} = feval(mf, cheb_a, rn);
-%     end
-% 
-%     % Concatenate results from cell arrays
-%     cm = cat(2, cm_cell{:});
-%     ca = cat(2, ca_cell{:});
-% 
-%     % output
-%     entr = -log(sum(ca) / sum(cm));
-% end
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %membership functions
-% function c = Triangular(dist, rn)
-%     c = zeros(size(dist));
-%     c(dist <= rn) = 1 - dist(dist <= rn) ./ rn;
-% end
-% 
-% function c = Trapezoidal(dist, rn)
-%     c = zeros(size(dist));
-%     c(dist <= rn) = 1;
-%     c(dist <= 2 * rn & dist > rn) = 2 - dist(dist <= 2 * rn & dist > rn) ./ rn;
-% end
-% 
-% function c = Z_shaped(dist, rn)
-%     c = zeros(size(dist));
-%     r1 = dist <= rn;
-%     r2 = dist > rn & dist <= 1.5 * rn;
-%     r3 = dist > 1.5 * rn & dist <= 2 * rn;
-%     c(r1) = 1;
-%     c(r2) = 1 - 2 .* ((dist(r2) - rn) ./ rn) .^ 2;
-%     c(r3) = 2 .* ((dist(r3) - 2 * rn) ./ rn) .^ 2;
-% end
-% 
-% function c = Bell_shaped(dist, rn)
-%     c = 1 ./ (1 + abs(dist ./ rn(1)) .^ (2 * rn(2)));
-% end
-% 
-% function c = Gaussian(dist, rn)
-%     c = exp(-(dist ./ (sqrt(2) * rn)) .^ 2);
-% end
-% 
-% function c = Constant_Gaussian(dist, rn)
-%     c = ones(size(dist));
-%     c(dist > rn) = exp(-log(2) .* ((dist(dist > rn) - rn) ./ rn) .^ 2);
-% end
-% 
-% function c = Exponential(dist, rn)
-%     c = exp(-dist .^ rn(2) ./ rn(1));
-% end
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

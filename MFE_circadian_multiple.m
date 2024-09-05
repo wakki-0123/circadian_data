@@ -12,7 +12,8 @@ e_all = cell(1, num_data);
 e_IAAFT_all = cell(1, num_data);
 q = 0;
 
-for data_index = 1:2
+for data_index = 1
+    
     % 各データを取得
     q = q + 1;
     data = data_cell{data_index};
@@ -56,6 +57,8 @@ plot_MFE_graph(e1, e2, data_l);
 
 end
 
+
+%%%%%%%%%%%
 function plot_MFE_graph(e1, e2, data_l)
 % マルチスケールファジーエントロピーのグラフをプロットする関数
 time_length = data_l * 5; % 全部の区間の秒数
@@ -98,6 +101,7 @@ function e = fuzzymsentropy(input, m, mf, rn, local, tau, factor)
     for i = 1:factor
         s = coarsegraining(y, i);
         sampe = FuzEn_MFs(s, m, mf, rn, local, tau);
+        
         e(i) = sampe;
     end
     e = e';
@@ -203,48 +207,6 @@ end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 正しいやつ
-function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-
-if nargin == 5, tau = 1; end
-if nargin == 4, local = 0; tau=1; end
-if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
-
-% parse inputs
-narginchk(6, 6);
-N     = length(ts);
-
-% normalization
-%ts = zscore(ts(:));
-
-% reconstruction
-indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
-indm = indm(:, 1:tau:end);
-ym   = ts(indm);
-
-inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
-inda = inda(:, 1:tau:end);
-ya   = ts(inda);
-
-if local
-    ym = ym - mean(ym, 2)*ones(1, m);
-    ya = ya - mean(ya, 2)*ones(1, m+1);
-end
-
-% inter-vector distance
-% if N < 1e4
-    ym = single(ym);
-    cheb = pdist(ym, 'chebychev'); % inf-norm
-    cm   = feval(mf, cheb, rn);
-
-    ya = single(ya);
-    cheb = pdist(ya, 'chebychev');
-    ca   = feval(mf, cheb, rn);
-
-% output
-entr = -log(sum(ca) / sum(cm));
-clear indm ym inda ya cheb cm ca;
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
 % 
 % if nargin == 5, tau = 1; end
@@ -272,79 +234,75 @@ end
 %     ya = ya - mean(ya, 2)*ones(1, m+1);
 % end
 % 
-% % inter-vector distance calculation
-% cheb_ym = zeros(size(ym, 1), size(ym, 1));
-% for i = 1:size(ym, 1)
-%     cheb_ym(i, :) = max(abs(ym - ym(i, :)), [], 2)';
-% end
-% cm = feval(mf, cheb_ym, rn);
+% % inter-vector distance
+% % if N < 1e4
 % 
-% cheb_ya = zeros(size(ya, 1), size(ya, 1));
-% for i = 1:size(ya, 1)
-%     cheb_ya(i, :) = max(abs(ya - ya(i, :)), [], 2)';
-% end
-% ca = feval(mf, cheb_ya, rn);
+%     cheb = pdist(ym, 'chebychev'); % inf-norm
+%     cm   = feval(mf, cheb, rn);
+% 
+% 
+%     cheb = pdist(ya, 'chebychev');
+%     ca   = feval(mf, cheb, rn);
 % 
 % % output
 % entr = -log(sum(ca) / sum(cm));
-% 
-% % clear variables
-% clear indm ym inda ya cheb_ym cheb_ya cm ca;
-% 
+% clear indm ym inda ya cheb cm ca;
 % end
+%%%%%%%%%%%%%
+function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-%     if nargin == 5, tau = 1; end
-%     if nargin == 4, local = 0; tau=1; end
-%     if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
-% 
-%     % parse inputs
-%     narginchk(6, 6);
-% 
-%     N = length(ts);
-% 
-%     % reconstruction
-%     indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
-%     indm = indm(:, 1:tau:end);
-%     ym   = ts(indm);
-% 
-%     inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
-%     inda = inda(:, 1:tau:end);
-%     ya   = ts(inda);
-% 
-%     if local
-%         ym = ym - mean(ym, 2)*ones(1, m);
-%         ya = ya - mean(ya, 2)*ones(1, m+1);
-%     end
-% 
-%     % Initialize sums for calculating cm and ca
-%     sum_cm = 0;
-%     sum_ca = 0;
-% 
-%     % Calculate distances and accumulate results
-%     for i = 1:size(ym, 1)
-%         for j = i+1:size(ym, 1)
-%             cheb_m = max(abs(ym(i, :) - ym(j, :)));
-%             cm = feval(mf, cheb_m, rn);
-%             sum_cm = sum_cm + cm;
-%         end
-%     end
-% 
-%     for i = 1:size(ya, 1)
-%         for j = i+1:size(ya, 1)
-%             cheb_a = max(abs(ya(i, :) - ya(j, :)));
-%             ca = feval(mf, cheb_a, rn);
-%             sum_ca = sum_ca + ca;
-%         end
-%     end
-% 
-%     % Output
-%     entr = -log(sum_ca / sum_cm);
-%     clear indm ym inda ya cheb_m cheb_a cm ca;
-% end
+if nargin == 5, tau = 1; end
+if nargin == 4, local = 0; tau=1; end
+if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
+
+% parse inputs
+narginchk(6, 6);
+N     = length(ts);
+
+% normalization
+%ts = zscore(ts(:));
+
+% reconstruction
+indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
+indm = indm(:, 1:tau:end);
+ym   = ts(indm);
+
+inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
+inda = inda(:, 1:tau:end);
+ya   = ts(inda);
+
+if local
+    ym = ym - mean(ym, 2)*ones(1, m);
+    ya = ya - mean(ya, 2)*ones(1, m+1);
+end
+
+% Inter-vector distance with batch processing
+batch_size = 1000;  % Adjust this value based on available memory
+num_batches = ceil(size(ym, 1) / batch_size);
+cm = zeros(size(ym, 1), 1);
+ca = zeros(size(ya, 1), 1);
+
+for i = 1:num_batches
+    batch_start = (i-1)*batch_size + 1;
+    batch_end = min(i*batch_size, size(ym, 1));
+    
+    cheb_m_batch = pdist2(ym(batch_start:batch_end, :), ym, 'chebychev');
+    cm(batch_start:batch_end) = max(cheb_m_batch, [], 2);
+    
+    cheb_a_batch = pdist2(ya(batch_start:batch_end, :), ya, 'chebychev');
+    ca(batch_start:batch_end) = max(cheb_a_batch, [], 2);
+end
+
+cm = feval(mf, cm, rn);
+ca = feval(mf, ca, rn);
+
+% output
+entr = -log(sum(ca) / sum(cm));
+clear indm ym inda ya cheb cm ca;
+end
 
 
+%%%%%%%%%%%%
 %membership functions
 function c = Triangular(dist, rn)
     c = zeros(size(dist));
@@ -383,21 +341,5 @@ end
 function c = Exponential(dist, rn)
     c = exp(-dist .^ rn(2) ./ rn(1));
 end
-%%%%%%%%%%%%%%%%%%%%%%%%%
-% 0627 add
-% function e = fuzzymsentropy(input, m, mf, rn, local, tau, factor)
-%     y = input;
-%     y = (y - mean(y)) / std(y);
-% 
-%     e = zeros(1, factor);
-%     for i = 1:factor
-%         if i == 1
-%             s = y;
-%         else
-%             s = coarsegraining(y, i);
-%         end
-%         e(i) = FuzEn_MFs(s, m, mf, rn, local, tau);
-%     end
-%     e = e';
-% end
+
 
