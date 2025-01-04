@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding="utf-8"?>
+<toc version="2.0">    
+    <tocitem target="Home.html">EntropyHub Toolbox    
+    
+        <tocitem target="Base.html">Base Entropies        
+        
+                <tocitem target="Ex_ApEn.html">Approximate Entropy</tocitem>
+                <tocitem target="Ex_AttnEn.html">Attention Entropy</tocitem>
+                <tocitem target="Ex_BubbEn.html">Bubble Entropy</tocitem>  
+                <tocitem target="Ex_CondEn.html">corrected Conditional Entropy</tocitem>
+                <tocitem target="Ex_CoSiEn.html">Cosine Similarity Entropy</tocitem>
+                <tocitem target="Ex_DispEn.html">Dispersion Entropy</tocitem>
+                <tocitem target="Ex_DistEn.html">Distribution Entropy</tocitem>
+                <tocitem target="Ex_EnofEn.html">Entropy of Entropy</tocitem>
+                <tocitem target="Ex_FuzzEn.html">Fuzzy Entropy</tocitem>
+                <tocitem target="Ex_GridEn.html">Gridded Distribution Entropy</tocitem>
+                <tocitem target="Ex_IncrEn.html">Increment Entropy </tocitem>
+                <tocitem target="Ex_K2En.html">Kolmogorov Entropy</tocitem>
+                <tocitem target="Ex_PermEn.html">Permutation Entropy</tocitem>
+                <tocitem target="Ex_PhasEn.html">Phase Entropy </tocitem>
+                <tocitem target="Ex_SampEn.html">Sample Entropy</tocitem>
+                <tocitem target="Ex_SlopEn.html">Slope Entropy</tocitem>
+                <tocitem target="Ex_SpecEn.html">Spectral Entropy</tocitem>           
+                <tocitem target="Ex_SyDyEn.html">Symbolic Dynamic Entropy</tocitem>   
+                <tocitem target="Ex_DivEn.html">Diversity Entropy</tocitem>   
+                <tocitem target="Ex_RangEn.html">Range Entropy</tocitem>                   
+        </tocitem>        
+
+        <tocitem target="Cross.html">Cross-Entropies
+        
+                <tocitem target="Ex_XApEn.html">Cross-Approximate Entropy</tocitem>
+                <tocitem target="Ex_XCondEn.html">corrected Cross-Conditional Entropy</tocitem>
+                <tocitem target="Ex_XDistEn.html">Cross-Distribution Entropy</tocitem>
+                <tocitem target="Ex_XFuzzEn.html">Cross-Fuzzy Entropy</tocitem>
+                <tocitem target="Ex_XK2En.html">Cross-Kolmogorov Entropy</tocitem>
+                <tocitem target="Ex_XPermEn.html">Cross-Permutation Entropy </tocitem>
+                <tocitem target="Ex_XSampEn.html">Cross-Sample Entropy</tocitem>
+                <tocitem target="Ex_XSpecEn.html">Cross-Spectral Entropy</tocitem>                
+        </tocitem>        
+
+        <tocitem target="Multivariate.html">Multivariate Entropies
+        
+                <tocitem target="Ex_MvSampEn.html">Multivariate Sample Entropy</tocitem>
+                <tocitem target="Ex_MvFuzzEn.html">Multivariate Fuzzy Entropy</tocitem>
+                <tocitem target="Ex_MvPermEn.html">Multivariate Permutation Entropy </tocitem>
+                <tocitem target="Ex_MvCoSiEn.html">Multivariate Cosine Similarity Entropy</tocitem>
+                <tocitem target="Ex_MvDispEn.html">Multivariate Dispersion Entropy </tocitem>
+        </tocitem>  
+
+        <tocitem target="Bidimensional.html">Bidimensional Entropies
+
+                <tocitem target="Ex_SampEn2D.html">Bidimensional Sample Entropy</tocitem>
+                <tocitem target="Ex_DistEn2D.html">Bidimensional Distribution Entropy</tocitem>
+                <tocitem target="Ex_FuzzEn2D.html">Bidimensional Fuzzy Entropy</tocitem>
+                <tocitem target="Ex_DispEn2D.html">Bidimensional Dispersion Entropy</tocitem>
+                <tocitem target="Ex_EspEn2D.html">Bidimensional Espinosa Entropy</tocitem>
+                <tocitem target="Ex_PermEn2D.html">Bidimensional Permutation Entropy</tocitem>                
+        </tocitem> 
+        
+        <tocitem target="Multiscale.html">Multiscale Entropies
+
+                <tocitem target="Ex_MSobject.html">Multiscale Entropy Object</tocitem>
+                <tocitem target="Ex_MSEn.html">Multiscale Entropy</tocitem>
+                <tocitem target="Ex_cMSEn.html">Composite and Refined-Composite Multiscale Entropy</tocitem>
+                <tocitem target="Ex_rMSEn.html">Refined Multiscale Entropy</tocitem>
+                <tocitem target="Ex_hMSEn.html">Hierarchical Multiscale Entropy</tocitem>
+        </tocitem>   
+        
+         <tocitem target="Multiscale_Cross.html">Multiscale Cross-Entropies
+
+                <tocitem target="Ex_MSobject.html">Multiscale Entropy Object</tocitem>
+                <tocitem target="Ex_XMSEn.html">Multiscale Cross-Entropy</tocitem>
+                <tocitem target="Ex_cXMSEn.html">Composite and Refined-Composite Multiscale Cross-Entropy</tocitem>
+                <tocitem target="Ex_rXMSEn.html">Refined Multiscale Cross-Entropy</tocitem>
+                <tocitem target="Ex_hXMSEn.html">Hierarchical Multiscale Cross-Entropy</tocitem>
+         </tocitem>
+
+         <tocitem target="Multivariate_Multiscale.html">Multivariate Multiscale Entropies
+
+                <tocitem target="Ex_MSobject.html">Multiscale Entropy Object</tocitem>
+                <tocitem target="Ex_MvMSEn.html">Multivariate Multiscale Entropy</tocitem>
+                <tocitem target="Ex_cMvMSEn.html">Composite and Refined-Composite Multivariate Multiscale Entropy</tocitem>
+        </tocitem>   
+
+         <tocitem target="Other.html">Other Functions
+
+                <tocitem target="ExampleData.html">Example Data Importer</tocitem>
+                <tocitem target="WindowData.html">Window Data Tool</tocitem>
+                <tocitem target="Ex_MSobject.html">Multiscale Entropy Object</tocitem>
+         </tocitem>
+
+
+    </tocitem>
+</toc>

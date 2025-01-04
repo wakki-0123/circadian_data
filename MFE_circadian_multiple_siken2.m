@@ -1,187 +1,249 @@
 function [e_all, e_IAAFT_all] = MFE_circadian_multiple_siken2(data_cell, c, maxiter, m, factor, mf, rn, local, tau)
-    % MFE_circadian_multiple: Circadian Rhythm用の複数データを処理する関数
+% MFE_circadian_multiple: Circadian Rhythm用の複数データを処理する関数
 
-    tic
-    numData = numel(data_cell);
-    e_all = cell(1, numData);
-    e_IAAFT_all = cell(1, numData);
-    e_IAAFT_std = cell(1, numData);
-    
-    pool = parpool('local', 2);  % 並列処理用のプールを作成
-    %progress_bar = waitbar(0, '計算中...');  % プログレスバーの表示
-    
-    parfor data_index = 1:numData
-        % 各データを取得
-        data = data_cell{data_index};
-        
-        % マルチスケールファジーエントロピーとIAAFTを計算
-        [e, e_IAAFT_mean, e_std] = MFE_circadian_single(data, c, maxiter, m, factor, mf, rn, local, tau);
+% 0405に実行したプログラム
+% MFE_circadian_multiple(data_cell,10,50,2,10000,'Exponential',[0.2 2],0,1);
+tic; % 時間計測用
+% データの数
+num_data = numel(data_cell);
 
-        % 結果を保存
-        e_all{data_index} = e; % original
-        e_IAAFT_all{data_index} = e_IAAFT_mean; %IAAFT_mean
-        e_IAAFT_std{data_index} = e_std; %IAAFT_std
-        
-        % 進捗表示
-        fprintf('データセット %d/%d 処理完了\n', data_index, numData);
-        
-    end
-
-    delete(pool);  % プールを閉じる
-    %close(progress_bar);  % プログレスバーを閉じる
+% 出力用の変数を初期化
+e_all = cell(1, num_data);
+e_IAAFT_all = cell(1, num_data);
+q = 0;
+pool = parpool('local', 10); % 4つのスレッドで並列処理を実行
+for data_index = 1
     
-    % ここから後は計算結果をプロットする処理です
-    data_l2 = factor;
-    ex = cell2mat(e_all);
-    ex = reshape(ex, numData, data_l2);
+    % 各データを取得
+    q = q + 1;
+    data = data_cell{data_index};
+    data_l = length(data);
     
-    ey = cell2mat(e_IAAFT_std);
-    ey = reshape(ey, numData, data_l2);
+    % マルチスケールファジーエントロピーとIAAFTを計算
+    [e, e_IAAFT] = MFE_circadian_single(data, c, maxiter, m, factor, mf, rn, local, tau, data_l);
     
-    ez = cell2mat(e_IAAFT_all);
-    ez = reshape(ez, numData, data_l2);
-
-    for j = 1:numData
-        plot_MFE_graph(ex(j,:), ey(j,:), ez(j,:), data_l2);
-        fprintf('グラフ表示 %d/%d\n', j, numData);
-    end
-
-    toc
+    % 結果を保存
+    e_all{data_index} = e;
+    e_IAAFT_all{data_index} = e_IAAFT;
+    disp("現在の稼働状況10段階 (全体でどのくらい進んでいるか)")
+    disp(q)
+end
+delete(pool);
+toc;    % 時間計測用
 end
 
-function [e1, e_IAAFT_mean, e_std] = MFE_circadian_single(data, c, maxiter, m, factor, mf, rn, local, tau)
-    data_gpu = gpuArray(data);  % GPU上でデータを処理
+function [e1, e_IAAFT] = MFE_circadian_single(data, c, maxiter, m, factor, mf, rn, local, tau, data_l)
+% MFE_circadian_single: 単一のデータに対してマルチスケールファジーエントロピーとIAAFTを計算する関数
 
-    e1 = fuzzymsentropy(data_gpu, m, mf, rn, local, tau, factor);
+% マルチスケールファジーエントロピーの計算
+e1 = fuzzymsentropy(data, m, mf, rn, local, tau, factor);
+disp('オリジナルファジイ完了')
 
-    e2 = zeros(factor, c, 'gpuArray');
-    [s, ~] = IAAFT(data_gpu, c, maxiter);
+% IAAFTを実行し、その結果のマルチスケールファジーエントロピーを計算
+e2 = zeros(factor, c);
+[s, ~] = IAAFT(data, c, maxiter);
+disp('サロゲート完了')
 
-    for i = 1:c
-        e2(:, i) = fuzzymsentropy(s(:, i), m, mf, rn, local, tau, factor);
-        fprintf('サロゲートデータ %d/%d 処理中...\n', i, c);  % サロゲートデータの進捗表示
-    end
-
-    e2 = gather(e2');
-    e_IAAFT_mean = mean(e2, 1);
-    e_std = std(e2, 0, 1);
+% サロゲートデータのマルチスケールファジーエントロピーを計算
+for i = 1:c
+    e2(:, i) = fuzzymsentropy(s(:, i), m, mf, rn, local, tau, factor);
+    disp("現在のサロゲートデータに関するファジーエントロピーの様子")
+    disp(i)
 end
 
-function plot_MFE_graph(e1, e2, e3, data_l)
-    time_length = data_l * 5;
-    factor = size(e2, 2);
-    time = time_length ./ (data_l ./ (1:factor));
+% 転置行列
+e2 = e2';
+e_IAAFT = mean(e2);
 
-    figure;
-    plot(time, e1, 'r')
-    hold on
-    errorbar(time, e3, e2, 'b');
-    legend('ORG', 'IAAFT', 'Location', 'southeast');
-    set(gca, 'XScale', 'log');
-    hold off
-    title('Heart Rate Multiscale Fuzzy Entropy');
-    xlabel('Time Scale');
-    ylabel('Fuzzy Entropy');
+% グラフの表示
+plot_MFE_graph(e1, e2, data_l);
+
 end
+
+
+%%%%%%%%%%%
+function plot_MFE_graph(e1, e2, data_l)
+% マルチスケールファジーエントロピーのグラフをプロットする関数
+time_length = data_l * 5; % 全部の区間の秒数
+factor = size(e2, 2);
+
+% 時間スケールを計算
+time_s = zeros(1, factor);
+time = zeros(1, factor);
+for i = 1:factor
+    time_s(i) = data_l / i; % 合計サンプルの個数
+    time(i) = time_length / time_s(i); % タイムスケール
+end
+
+% グラフの表示
+figure;
+plot(time, e1, 'r')
+hold on
+errorbar(time, mean(e2), std(e2), 'b');
+
+lgd = legend('ORG', 'IAAFT', 'Location', 'southeast');
+lgd.FontSize = 40;
+set(gca, 'XScale', 'log');
+ax = gca;
+ax.FontSize = 40;
+hold off
+title('Heart Rate Multiscale Fuzzy Entropy');
+xlabel('Time Scale');
+ylabel('Fuzzy Entropy');
+
+end
+
+
+% function e = fuzzymsentropy(input, m, mf, rn, local, tau, factor)
+%     y = input;
+%     y = y - mean(y);
+%     y = y / std(y);
+%     e = zeros(factor, 1);
+%     %pool = parpool(10);
+% 
+%     for i = 1:factor
+%         s = coarsegraining(y, i);
+%         sampe = FuzEn_MFs(s, m, mf, rn, local, tau);
+% 
+%         e(i) = sampe;
+%     end
+%     e = e';
+% 
+% end
+% 
 
 function e = fuzzymsentropy(input, m, mf, rn, local, tau, factor)
-    y = gpuArray(input);
+    y = input;
     y = y - mean(y);
     y = y / std(y);
-    e = zeros(factor, 1, 'gpuArray');
+    e = zeros(factor, 1);
     
-    for i = 1:factor
-        s = coarsegraining(y, i);
-        sampe = FuzEn_MFs(s, m, mf, rn, local, tau);
-        e(i) = sampe;
+    % 並列処理用に最小のiの範囲を定義（例: 1から100まで）
+    parallelRange = min(factor, 10); % iの範囲
+    remainingRange = factor - parallelRange;
+    
+    % 並列処理のためのparforループ
+    if parallelRange > 0
+        parfor i = 1:parallelRange
+            s = coarsegraining(y, i);
+            sampe = FuzEn_MFs(s, m, mf, rn, local, tau);
+            e(i) = sampe;
+        end
     end
-    e = gather(e');
+    
+    % 残りの処理を通常のforループで
+    if remainingRange > 0
+        parfor i = (parallelRange + 1):factor
+            s = coarsegraining(y, i);
+            sampe = FuzEn_MFs(s, m, mf, rn, local, tau);
+            e(i) = sampe;
+        end
+    end
+    
+    e = e';
 end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 正しいやつ
 % function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-%     if nargin == 5, tau = 1; end
-%     if nargin == 4, local = 0; tau=1; end
-%     if nargin == 3, rn = 0.2 * std(ts); local = 0; tau = 1; end
 % 
-%     ts_gpu = gpuArray(ts); % Move to GPU
-%     N = length(ts_gpu);
+% if nargin == 5, tau = 1; end
+% if nargin == 4, local = 0; tau=1; end
+% if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
 % 
-%     indm = hankel(1:N-m*tau, N-m*tau:N-tau);
-%     indm = gpuArray(indm(:, 1:tau:end));
-%     ym = ts_gpu(indm);
+% % parse inputs
+% narginchk(6, 6);
+% N     = length(ts);
 % 
-%     inda = hankel(1:N-m*tau, N-m*tau:N);
-%     inda = gpuArray(inda(:, 1:tau:end));
-%     ya = ts_gpu(inda);
+% % normalization
+% %ts = zscore(ts(:));
 % 
-%     if local
-%         ym = ym - mean(ym, 2) * ones(1, m, 'gpuArray');
-%         ya = ya - mean(ya, 2) * ones(1, m + 1, 'gpuArray');
-%     end
+% % reconstruction
+% indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
+% indm = indm(:, 1:tau:end);
+% ym   = ts(indm);
 % 
-%     cheb_m = pdist2(ym, ym, 'chebychev', 'gpuArray');
-%     cm = feval(mf, cheb_m, rn);
+% inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
+% inda = inda(:, 1:tau:end);
+% ya   = ts(inda);
 % 
-%     cheb_a = pdist2(ya, ya, 'chebychev', 'gpuArray');
-%     ca = feval(mf, cheb_a, rn);
-% 
-%     entr = -log(sum(ca) / sum(cm));
-%     entr = gather(entr); % gather results back to CPU if needed
+% if local
+%     ym = ym - mean(ym, 2)*ones(1, m);
+%     ya = ya - mean(ya, 2)*ones(1, m+1);
 % end
-
-
+% 
+% % inter-vector distance
+% % if N < 1e4
+% 
+%     cheb = pdist(ym, 'chebychev'); % inf-norm
+%     cm   = feval(mf, cheb, rn);
+% 
+% 
+%     cheb = pdist(ya, 'chebychev');
+%     ca   = feval(mf, cheb, rn);
+% 
+% % output
+% entr = -log(sum(ca) / sum(cm));
+% clear indm ym inda ya cheb cm ca;
+% end
+%%%%%%%%%%%%%
 function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
 
 if nargin == 5, tau = 1; end
-if nargin == 4, local = 0; tau=1; end
-if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
+if nargin == 4, local = 0; tau = 1; end
+if nargin == 3, rn = 0.2 * std(ts); local = 0; tau = 1; end
 
 % parse inputs
 narginchk(6, 6);
-N     = length(ts);
-
-% normalization
-%ts = zscore(ts(:));
+N = length(ts);
 
 % reconstruction
 indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
 indm = indm(:, 1:tau:end);
-ym   = ts(indm);
+ym = ts(indm);
 
 inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
 inda = inda(:, 1:tau:end);
-ya   = ts(inda);
+ya = ts(inda);
 
 if local
-    ym = ym - mean(ym, 2)*ones(1, m);
-    ya = ya - mean(ya, 2)*ones(1, m+1);
+    ym = ym - mean(ym, 2) * ones(1, m);
+    ya = ya - mean(ya, 2) * ones(1, m+1);
 end
 
-% Inter-vector distance with batch processing
-batch_size = 1000;  % Adjust this value based on available memory
-num_batches = ceil(size(ym, 1) / batch_size);
-cm = zeros(size(ym, 1), 1);
-ca = zeros(size(ya, 1), 1);
+% Compute distances and fuzzy entropy
+cm = compute_fuzzy_entropy(ym, m, mf, rn);
+ca = compute_fuzzy_entropy(ya, m+1, mf, rn);
 
-for i = 1:num_batches
-    batch_start = (i-1)*batch_size + 1;
-    batch_end = min(i*batch_size, size(ym, 1));
-    
-    cheb_m_batch = pdist2(ym(batch_start:batch_end, :), ym, 'chebychev');
-    cm(batch_start:batch_end) = max(cheb_m_batch, [], 2);
-    
-    cheb_a_batch = pdist2(ya(batch_start:batch_end, :), ya, 'chebychev');
-    ca(batch_start:batch_end) = max(cheb_a_batch, [], 2);
-end
-
-cm = feval(mf, cm, rn);
-ca = feval(mf, ca, rn);
-
-% output
+% Output
 entr = -log(sum(ca) / sum(cm));
-clear indm ym inda ya cheb cm ca;
 end
 
+function entropy = compute_fuzzy_entropy(X, m, mf, rn)
+    % Computes fuzzy entropy for the given data
+    [N, ~] = size(X);
+    entropy = zeros(1, N * (N - 1) / 2,'single');
+
+    index = 1;
+    for i = 1:N-1
+        for j = i+1:N
+            % Calculate the Chebyshev distance between X(i,:) and X(j,:)
+            dist = max(abs(X(i, :) - X(j, :)));
+
+            % Apply the membership function
+            c = feval(mf, dist, rn);
+
+            % Store the result
+            entropy(index) = c;
+            index = index + 1;
+        end
+    end
+end
+
+
+
+%%%%%%%%%%%%
 %membership functions
 function c = Triangular(dist, rn)
     c = zeros(size(dist));

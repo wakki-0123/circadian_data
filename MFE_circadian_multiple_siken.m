@@ -244,95 +244,95 @@ end
 % end
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 正しいやつ
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%正しいやつ
+function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
+    if nargin == 5, tau = 1; end
+    if nargin == 4, local = 0; tau=1; end
+    if nargin == 3, rn=0.2*std(ts); local = 0; tau=1; end
+
+    % Normalization
+    ts_gpu = gpuArray(ts);  % Move to GPU
+
+    % Reconstruction
+    indm = hankel(1:length(ts_gpu)-m*tau, length(ts_gpu)-m*tau:length(ts_gpu)-tau); % indexing elements for dim-m
+    indm = gpuArray(indm(:, 1:tau:end));
+    ym = ts_gpu(indm);
+
+    inda = hankel(1:length(ts_gpu)-m*tau, length(ts_gpu)-m*tau:length(ts_gpu)); % for dim-m+1
+    inda = gpuArray(inda(:, 1:tau:end));
+    ya = ts_gpu(inda);
+
+    if local
+        ym = ym - mean(ym, 2)*ones(1, m, 'gpuArray');
+        ya = ya - mean(ya, 2)*ones(1, m+1, 'gpuArray');
+    end
+
+    % Inter-vector distance (on GPU)
+    cheb_m = pdist(ym, 'chebychev', 'gpuArray'); % inf-norm
+    cm = feval(mf, cheb_m, rn);
+
+    cheb_a = pdist(ya, 'chebychev', 'gpuArray');
+    ca = feval(mf, cheb_a, rn);
+
+    % Output
+    entr = -log(sum(ca) / sum(cm));
+    entr = gather(entr); % gather results back to CPU if needed
+end
+
+
+
 % function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-%     if nargin == 5, tau = 1; end
-%     if nargin == 4, local = 0; tau=1; end
-%     if nargin == 3, rn=0.2*std(ts); local = 0; tau=1; end
 % 
-%     % Normalization
-%     ts_gpu = gpuArray(ts);  % Move to GPU
+% if nargin == 5, tau = 1; end
+% if nargin == 4, local = 0; tau=1; end
+% if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
 % 
-%     % Reconstruction
-%     indm = hankel(1:length(ts_gpu)-m*tau, length(ts_gpu)-m*tau:length(ts_gpu)-tau); % indexing elements for dim-m
-%     indm = gpuArray(indm(:, 1:tau:end));
-%     ym = ts_gpu(indm);
+% % parse inputs
+% narginchk(6, 6);
+% N     = length(ts);
 % 
-%     inda = hankel(1:length(ts_gpu)-m*tau, length(ts_gpu)-m*tau:length(ts_gpu)); % for dim-m+1
-%     inda = gpuArray(inda(:, 1:tau:end));
-%     ya = ts_gpu(inda);
+% % normalization
+% %ts = zscore(ts(:));
 % 
-%     if local
-%         ym = ym - mean(ym, 2)*ones(1, m, 'gpuArray');
-%         ya = ya - mean(ya, 2)*ones(1, m+1, 'gpuArray');
-%     end
+% % reconstruction
+% indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
+% indm = indm(:, 1:tau:end);
+% ym   = ts(indm);
 % 
-%     % Inter-vector distance (on GPU)
-%     cheb_m = pdist(ym, 'chebychev', 'gpuArray'); % inf-norm
-%     cm = feval(mf, cheb_m, rn);
+% inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
+% inda = inda(:, 1:tau:end);
+% ya   = ts(inda);
 % 
-%     cheb_a = pdist(ya, 'chebychev', 'gpuArray');
-%     ca = feval(mf, cheb_a, rn);
-% 
-%     % Output
-%     entr = -log(sum(ca) / sum(cm));
-%     entr = gather(entr); % gather results back to CPU if needed
+% if local
+%     ym = ym - mean(ym, 2)*ones(1, m);
+%     ya = ya - mean(ya, 2)*ones(1, m+1);
 % end
 % 
-
-
-function entr = FuzEn_MFs(ts, m, mf, rn, local, tau)
-
-if nargin == 5, tau = 1; end
-if nargin == 4, local = 0; tau=1; end
-if nargin == 3, rn=0.2*std(ts);local = 0; tau=1; end
-
-% parse inputs
-narginchk(6, 6);
-N     = length(ts);
-
-% normalization
-%ts = zscore(ts(:));
-
-% reconstruction
-indm = hankel(1:N-m*tau, N-m*tau:N-tau);    % indexing elements for dim-m
-indm = indm(:, 1:tau:end);
-ym   = ts(indm);
-
-inda = hankel(1:N-m*tau, N-m*tau:N);        % for dim-m+1
-inda = inda(:, 1:tau:end);
-ya   = ts(inda);
-
-if local
-    ym = ym - mean(ym, 2)*ones(1, m);
-    ya = ya - mean(ya, 2)*ones(1, m+1);
-end
-
-% Inter-vector distance with batch processing
-batch_size = 1000;  % Adjust this value based on available memory
-num_batches = ceil(size(ym, 1) / batch_size);
-cm = zeros(size(ym, 1), 1);
-ca = zeros(size(ya, 1), 1);
-
-for i = 1:num_batches
-    batch_start = (i-1)*batch_size + 1;
-    batch_end = min(i*batch_size, size(ym, 1));
-    
-    cheb_m_batch = pdist2(ym(batch_start:batch_end, :), ym, 'chebychev');
-    cm(batch_start:batch_end) = max(cheb_m_batch, [], 2);
-    
-    cheb_a_batch = pdist2(ya(batch_start:batch_end, :), ya, 'chebychev');
-    ca(batch_start:batch_end) = max(cheb_a_batch, [], 2);
-end
-
-cm = feval(mf, cm, rn);
-ca = feval(mf, ca, rn);
-
-% output
-entr = -log(sum(ca) / sum(cm));
-clear indm ym inda ya cheb cm ca;
-end
+% % Inter-vector distance with batch processing
+% batch_size = 1000;  % Adjust this value based on available memory
+% num_batches = ceil(size(ym, 1) / batch_size);
+% cm = zeros(size(ym, 1), 1);
+% ca = zeros(size(ya, 1), 1);
+% 
+% for i = 1:num_batches
+%     batch_start = (i-1)*batch_size + 1;
+%     batch_end = min(i*batch_size, size(ym, 1));
+% 
+%     cheb_m_batch = pdist2(ym(batch_start:batch_end, :), ym, 'chebychev');
+%     cm(batch_start:batch_end) = max(cheb_m_batch, [], 2);
+% 
+%     cheb_a_batch = pdist2(ya(batch_start:batch_end, :), ya, 'chebychev');
+%     ca(batch_start:batch_end) = max(cheb_a_batch, [], 2);
+% end
+% 
+% cm = feval(mf, cm, rn);
+% ca = feval(mf, ca, rn);
+% 
+% % output
+% entr = -log(sum(ca) / sum(cm));
+% clear indm ym inda ya cheb cm ca;
+% end
 
 %membership functions
 function c = Triangular(dist, rn)
