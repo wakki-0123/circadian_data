@@ -45,10 +45,12 @@ function [e1, e_IAAFT] = MFE_circadian_single(data, c, maxiter, m, factor, mf, r
 e1 = fuzzymsentropy(data, m, mf, rn, local, tau, factor,num);
 disp('オリジナル完了');
 % IAAFTを実行し、その結果のマルチスケールファジーエントロピーを計算
+% 予備的な変数設定
+%num = 7;
 e2 = zeros(factor - num, c); % 修正: e2 のサイズを factor - num x c に設定
 [s, ~] = IAAFT(data, c, maxiter);
 disp('サロゲート完了');
-% サロゲートデータに対するマルチスケールファジーエントロピーを計算
+% サロゲートデータのマルチスケールファジーエントロピーを計算
 for i = 1:c
     e2(:, i) = fuzzymsentropy(s(:, i), m, mf, rn, local, tau, factor,num);
     disp("現在のサロゲートデータに関するファジーエントロピーの様子")
@@ -97,7 +99,7 @@ function e = fuzzymsentropy(input, m, mf, rn, local, tau, factor,num)
     y = input;
     y = y - mean(y);
     y = y / std(y);
-    % num は計算に使用しない部分を除外するための閾値 (通常時はnum = 0)
+    % num は計算に使用しない部分を除外するための閾値
     %num = 7; % factor cut
     % e のサイズを factor - num に設定
     e = zeros(factor - num, 1);
